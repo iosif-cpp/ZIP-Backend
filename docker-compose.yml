@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: serilog
+      POSTGRES_USER: serilog
+      POSTGRES_PASSWORD: serilog
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      HTTP_PORTS: 5278
+      ConnectionStrings__PostgresLogging: Host=postgres;Port=5432;Database=serilog;Username=serilog;Password=serilog
+      Archive__FilesDir: /app/files
+    depends_on:
+      - postgres
+    ports:
+      - "5278:5278"
+    volumes:
+      - C:\Users\MSI\RiderProjects\Kaspersky-Task1\Kaspersky-Task1\files:/app/files
+
+volumes:
+  postgres_data:
+
