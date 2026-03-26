@@ -48,42 +48,40 @@ var postgresConnectionString = builder.Configuration.GetConnectionString("Postgr
 var postgresTableName = builder.Configuration["Serilog:Postgres:TableName"] ?? "http_request_logs";
 var postgresNeedAutoCreateTable = builder.Configuration.GetValue<bool?>("Serilog:Postgres:NeedAutoCreateTable") ?? true;
 
-if (!string.IsNullOrWhiteSpace(postgresConnectionString))
+builder.Host.UseSerilog((context, services, loggerConfiguration) =>
 {
-    var columnWriters = new Dictionary<string, ColumnWriterBase>
-    {
-        { "message", new RenderedMessageColumnWriter(NpgsqlDbType.Text) },
-        { "message_template", new MessageTemplateColumnWriter(NpgsqlDbType.Text) },
-        { "level", new LevelColumnWriter(true, NpgsqlDbType.Varchar) },
-        { "raise_date", new TimestampColumnWriter(NpgsqlDbType.TimestampTz) },
-        { "exception", new ExceptionColumnWriter(NpgsqlDbType.Text) },
-        { "properties", new LogEventSerializedColumnWriter(NpgsqlDbType.Jsonb) }
-    };
+    loggerConfiguration
+        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+        .Enrich.FromLogContext()
+        .WriteTo.Console();
 
-    builder.Host.UseSerilog((context, services, loggerConfiguration) =>
+    if (!string.IsNullOrWhiteSpace(postgresConnectionString))
     {
-        loggerConfiguration
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-            .Enrich.FromLogContext()
-            .WriteTo.Console()
-            .WriteTo.PostgreSQL(
-                postgresConnectionString,
-                postgresTableName,
-                columnWriters,
-                needAutoCreateTable: postgresNeedAutoCreateTable,
-                period: TimeSpan.FromSeconds(1));
-    });
-}
+        var columnWriters = new Dictionary<string, ColumnWriterBase>
+        {
+            { "message", new RenderedMessageColumnWriter(NpgsqlDbType.Text) },
+            { "message_template", new MessageTemplateColumnWriter(NpgsqlDbType.Text) },
+            { "level", new LevelColumnWriter(true, NpgsqlDbType.Varchar) },
+            { "raise_date", new TimestampColumnWriter(NpgsqlDbType.TimestampTz) },
+            { "exception", new ExceptionColumnWriter(NpgsqlDbType.Text) },
+            { "properties", new LogEventSerializedColumnWriter(NpgsqlDbType.Jsonb) }
+        };
+
+        loggerConfiguration.WriteTo.PostgreSQL(
+            postgresConnectionString,
+            postgresTableName,
+            columnWriters,
+            needAutoCreateTable: postgresNeedAutoCreateTable,
+            period: TimeSpan.FromSeconds(1));
+    }
+});
 
 var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
 
-if (!string.IsNullOrWhiteSpace(postgresConnectionString))
-{
-    app.UseSerilogRequestLogging();
-}
+app.UseSerilogRequestLogging();
 
 if (!app.Environment.IsDevelopment())
 {
