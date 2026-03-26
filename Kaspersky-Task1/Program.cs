@@ -23,14 +23,14 @@ builder.Services.AddSwaggerGen(o =>
 });
 
 var filesDirRel = builder.Configuration["Archive:FilesDir"] ?? "files";
-var zipArchivesDirRel = builder.Configuration["Archive:ZipArchivesDir"] ?? "ZipArchives";
 var maxFiles = builder.Configuration.GetValue<int?>("Archive:MaxFilesPerArchive") ?? 1000;
+var cacheTtlMinutes = builder.Configuration.GetValue<int?>("Archive:ArchiveCacheTtlMinutes") ?? 5;
 
 var archiveOptions = new ArchiveOptions
 {
     FilesDir = Path.Combine(builder.Environment.ContentRootPath, filesDirRel),
-    ZipArchivesDir = Path.Combine(builder.Environment.ContentRootPath, zipArchivesDirRel),
-    MaxFilesPerArchive = maxFiles
+    MaxFilesPerArchive = maxFiles,
+    ArchiveCacheTtlMinutes = cacheTtlMinutes
 };
 
 builder.Services.AddSingleton(archiveOptions);

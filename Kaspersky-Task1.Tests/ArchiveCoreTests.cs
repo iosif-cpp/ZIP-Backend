@@ -24,11 +24,7 @@ public sealed class ArchiveCoreTests
             await File.WriteAllTextAsync(file1, "A");
             await File.WriteAllTextAsync(file2, "B");
 
-            var opts = new ArchiveOptions
-            {
-                FilesDir = filesDir,
-                ZipArchivesDir = Path.Combine(root, "ZipArchives")
-            };
+            var opts = new ArchiveOptions { FilesDir = filesDir };
             var catalog = new PhysicalFileCatalog(opts);
 
             var result = await catalog.ResolveRequestedFilesAsync(new[] { "a.txt", "b.txt" }, CancellationToken.None);
@@ -54,11 +50,7 @@ public sealed class ArchiveCoreTests
             Directory.CreateDirectory(filesDir);
             await File.WriteAllTextAsync(Path.Combine(filesDir, "a.txt"), "A");
 
-            var opts = new ArchiveOptions
-            {
-                FilesDir = filesDir,
-                ZipArchivesDir = Path.Combine(root, "ZipArchives")
-            };
+            var opts = new ArchiveOptions { FilesDir = filesDir };
             var catalog = new PhysicalFileCatalog(opts);
 
             await Assert.ThrowsAsync<ArgumentException>(async () =>
@@ -80,11 +72,7 @@ public sealed class ArchiveCoreTests
         var root = CreateTempDir();
         try
         {
-            var opts = new ArchiveOptions
-            {
-                FilesDir = Path.Combine(root, "files"),
-                ZipArchivesDir = Path.Combine(root, "ZipArchives")
-            };
+            var opts = new ArchiveOptions { FilesDir = Path.Combine(root, "files") };
             var cache = new ArchiveCache(opts);
 
             var p1 = cache.GetCacheKeyForFiles(new[] { "B.TXT", "a.txt" });

@@ -1,11 +1,9 @@
 using System.Threading.Channels;
-using Kaspersky_Task1.Configuration;
 using Kaspersky_Task1.Domain;
 using Kaspersky_Task1.Services.Builders;
 using Kaspersky_Task1.Services.Caches;
 using Kaspersky_Task1.Services.Catalogs;
 using Kaspersky_Task1.Services.Stores;
-using Microsoft.Extensions.Hosting;
 
 namespace Kaspersky_Task1.Background;
 
@@ -16,7 +14,6 @@ public sealed class ArchiveBackgroundWorker : BackgroundService
     private readonly IFileCatalog _fileCatalog;
     private readonly IArchiveBuilder _zipBuilder;
     private readonly IArchiveCache _cache;
-    private readonly ArchiveOptions _opts;
     private readonly ILogger<ArchiveBackgroundWorker> _logger;
 
     public ArchiveBackgroundWorker(
@@ -25,7 +22,6 @@ public sealed class ArchiveBackgroundWorker : BackgroundService
         IFileCatalog fileCatalog,
         IArchiveBuilder zipBuilder,
         IArchiveCache cache,
-        ArchiveOptions opts,
         ILogger<ArchiveBackgroundWorker> logger)
     {
         _queue = queue;
@@ -33,7 +29,6 @@ public sealed class ArchiveBackgroundWorker : BackgroundService
         _fileCatalog = fileCatalog;
         _zipBuilder = zipBuilder;
         _cache = cache;
-        _opts = opts;
         _logger = logger;
     }
 
